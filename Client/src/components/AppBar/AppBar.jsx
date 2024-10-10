@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Theme from "../../theme.jsx";
+import classes from "./AppBar.styles.js" 
 
 const drawerWidth = 265;
 
@@ -108,7 +109,7 @@ export default function UiAppBar({ children, title }) {
         >
           <List
             component="nav"
-            sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+            sx={classes.drawerList}
           >
             <Box className="AppBoxLogo" onClick={() => navigate("/")}>
               <img src={logo} alt="IF" className="imglogo" />
