@@ -1,8 +1,8 @@
 const generator = require('generate-password');
-const db = require('../db/db')
+const db = require('../db/db');
 const { v4: uuidv4 } = require('uuid');
 
-const tipoUsuarioProfessor = 1
+const tipoUsuarioProfessor = 1;
 
 exports.addTeacher = async (req, res) => {
   const { email, name, siape, subjects } = req.body;
@@ -22,9 +22,7 @@ exports.addTeacher = async (req, res) => {
       [email, password, name, siape, type, id_usuario]
     );
 
-
     if (subjects && subjects.length > 0) {
-
       for (const subject of subjects) {
         // Gera um UUID válido para cada disciplina se necessário
         await db.query(
@@ -32,7 +30,6 @@ exports.addTeacher = async (req, res) => {
           [subject, id_usuario]
         );
       }
-
     }
 
     res.status(200).send("Usuário registrado com sucesso");
@@ -104,29 +101,32 @@ exports.editTeacher = async (req, res) => {
   }
 };
 
-
-
 exports.getProfessores = async (req, res) => {
-    try {
-      const resposta = await db.query("SELECT * FROM usuario WHERE usuario_tipo = $1", [tipoUsuarioProfessor]);
-      res.status(200).json(resposta);
-    } catch (err) {
-      console.error(err);
-      res
-        .status(500)
-        .json({ error: "Erro ao buscar usuários", details: err.message });
-    }
-  };
+  try {
+    const resposta = await db.query("SELECT * FROM usuario WHERE usuario_tipo = $1", [tipoUsuarioProfessor]);
+    res.status(200).json(resposta);
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Erro ao buscar usuários", details: err.message });
+  }
+};
 
 exports.getProfessorById = async (req, res) => {
-  const id_user = req.params.id
+  const id_user = req.params.id;
   try {
-      const resposta = await db.query("SELECT * FROM usuario WHERE id_usuario = $1 AND usuario_tipo = $2", [id_user, tipoUsuarioProfessor])
-      res.status(200).send(resposta)
-  } catch (err) {
-      res.status(404).send(err)
+    const resposta = await db.query("SELECT * FROM usuario WHERE id_usuario = $1 AND usuario_tipo = $2", [id_user, tipoUsuarioProfessor]);
+
+    if (resposta.rowCount === 0) {
+      return res.status(404).json({ message: "Professor não encontrado" });
+    }
+
+    return res.status(200).send(resposta);
+  } catch (error) {
+    throw new Error(error);
   }
-}
+};
 
 exports.deleteTeacher = async (req, res) => {
   const id = req.params.id;
@@ -156,4 +156,3 @@ exports.deleteTeacher = async (req, res) => {
     res.status(500).send({ error: 'Erro ao excluir o professor', details: err.message });
   }
 };
-

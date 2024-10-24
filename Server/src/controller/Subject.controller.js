@@ -12,14 +12,19 @@ exports.getSubjects = async (_req, res) => {
 };
 
 exports.getSubjectById = async (req, res) => {
-    const id = req.params.id
+    const id = req.params.id;
     try {
-        const response = await db.query("SELECT * FROM disciplina WHERE id_disciplina = $1", id)
-        res.status(200).json(response)
+        const response = await db.query("SELECT * FROM disciplina WHERE id_disciplina = $1", [id]);
+
+        if (response.rowCount === 0) {
+            return res.status(404).json({ message: "Disciplina não encontrada" });
+        }
+
+        res.status(200).json(response);
     } catch (error) {
-        res.status(500).send(error)
+        res.status(500).send(error);
     }
-}
+};
 
 exports.addSubject = async (req, res) => {
     const { nome } = req.body;
@@ -64,14 +69,20 @@ exports.editSubject = async (req, res) => {
 exports.excludeSubject = async (req, res) => {
     const id = req.params.id;
     try {
-        await db.query(
+        const result = await db.query(
             "DELETE FROM disciplina WHERE id_disciplina = $1", [id]
-        )
-        res.status(200).send("disciplina excluída com sucesso!")
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).send("Disciplina não encontrada");
+        }
+
+        res.status(200).send("Disciplina excluída com sucesso!");
     } catch (error) {
-        res.status(500).send('Erro ao excluir disciplina!')
+        res.status(500).send('Erro ao excluir disciplina!');
     }
-}
+};
+
 
 // exports.getNameAndIDFromAllSubjects = async (req, res) => {
 //     try {

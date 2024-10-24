@@ -6,6 +6,7 @@ exports.getCourses = async (req, res) => {
     const response = await db.query("SELECT * FROM curso");
     res.status(200).json(response);
   } catch (err) {
+    console.error("GET TURMA BY ID", err);
     res.status(500).send(err);
   }
 };
@@ -18,6 +19,7 @@ exports.getCourseByID = async (req, res) => {
     ]);
     res.status(200).json(response);
   } catch (err) {
+    console.error("GET TURMA BY ID", err);
     res.status(500).send(err);
   }
 };
@@ -29,12 +31,10 @@ exports.addCourse = async (req, res) => {
     const response = await db.query(
       "INSERT INTO curso (id_curso, nome, padrao, id_professor) values ($1, $2, $3, $4)", [id_course, name, pattern, coordenador]
     );
-    res.status(201).send(response)
-  } catch (err
-  ) {
+    res.status(201).send(response);
+  } catch (err) {
     res.status(500).send(err);
   }
-  
 };
 
 exports.editCourse = async (req, res) => {
@@ -44,9 +44,9 @@ exports.editCourse = async (req, res) => {
   try {
     const result = await db.query(
       "UPDATE curso SET nome = $1, padrao = $2, id_professor = $3 WHERE id_curso = $4",
-      [name, pattern, coordenador, id_course]  
+      [name, pattern, coordenador, id_course]
     );
-    res.send(result.rows); 
+    res.send(result.rows);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -55,9 +55,14 @@ exports.editCourse = async (req, res) => {
 exports.deleteCourse = async (req, res) => {
   const id_course = req.params.id;
   try {
-    await db.query("DELETE FROM curso WHERE id_curso = $1 ", [id_course]);
-    res.status(204).send();
-  } catch (err) {
-    res.status(500).json(err);
+    const result = await db.query("DELETE FROM curso WHERE id_curso = $1", [id_course]);
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Curso não encontrado"}) 
+    }
+
+    return res.status(204).send();
+  } catch (error) {
+    throw new Error(error);
   }
-}
+};

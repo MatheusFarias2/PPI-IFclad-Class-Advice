@@ -89,4 +89,5 @@ exports.addSector = async (req, res) => {
     console.error("Erro ao adicionar um novo setor:", error);
     res.status(500).send("Erro ao adicionar um novo setor");
   }
+  
 };

@@ -1,37 +1,41 @@
 const db = require("../db/db");
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
 
 const comparePassword = async (userEnteredPassword, hashedPassword) => {
-    const isMatch = await bcrypt.compare(userEnteredPassword, hashedPassword)
+    const isMatch = await bcrypt.compare(userEnteredPassword, hashedPassword);
     if (isMatch) {
-        console.log("usuário válido")
-        return isMatch
+        console.log("usuário válido");
+        return isMatch;
     } else {
-        console.log("senha ou email incorretos")
-        return isMatch
+        console.log("senha ou email incorretos");
+        return isMatch;
     }
 }
 
 exports.getUserData = async (req, res) => {
-    const {email, password} = req.body
+    const { email, password } = req.body;
     try {
-        let userData = await db.query('SELECT * FROM usuario WHERE email = $1', [email])
+        let userData = await db.query('SELECT * FROM usuario WHERE email = $1', [email]);
+
+        if (userData.rowCount === 0) {
+            return res.status(404).json({ message: "Usuário não encontrado" });
+        }
+
         await userData.map(user => {
             userData = {
                 email: user.email,
                 password: user.senha
             }
-        })
+        });
 
         if ('email' in userData) {
-            await comparePassword(password, userData.password)
-            res.send("usuario encontrado!").status(200)
+            await comparePassword(password, userData.password);
+            return res.status(204).send();
         } else {
-            res.send("usuário não encontrado").status(404)
+            return res.status(404).json({ message: "Usuário não encontrado" });
         }
         
-    } catch (err) {
-        res.status(500).send(err)
-
+    } catch (error) {
+        throw new Error(error);
     }
 }

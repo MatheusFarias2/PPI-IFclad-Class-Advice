@@ -19,19 +19,24 @@ exports.addStudent = async (req, res) => {
 exports.getStudent = async (req, res) => {
     const id = req.params.idTurma;  
     try {
-        const response = await db.query("SELECT * FROM aluno WHERE id_turma = $1", id)
-        res.status(200).json(response)   
-    } catch(err) {
-        res.status(500).send(err);
+        const response = await db.query("SELECT * FROM aluno WHERE id_turma = $1", id);
+
+        if (response.rowCount === 0) {
+            return res.status(404).json({ message: "Turma não encontrada" });
+        }
+
+        return res.status(204).send();
+    } catch (error) {
+        throw new Error(error);
     }
 }
+
 exports.getStudentByID = async (req, res) => {
-    // const idTurma = req.params.idTurma;
     const idStudent = req.params.idStudent;
     try {
-        const response = await db.query("SELECT * FROM aluno WHERE id_aluno = $1 ", idStudent)
-        res.status(200).json(response)   
-    } catch(err) {
+        const response = await db.query("SELECT * FROM aluno WHERE id_aluno = $1 ", idStudent);
+        res.status(200).json(response);   
+    } catch (err) {
         res.status(500).send(err);
     }
 }
@@ -59,10 +64,14 @@ exports.updateStudent = async (req, res) => {
 exports.excludeStudent = async (req, res) => {
   const idStudent = req.params.idStudent;
   try {
-    await db.query(`DELETE FROM aluno WHERE id_aluno = $1`, [ idStudent ] )
-    res.status(205).send("ok")
-  } catch (err) {
-    res.status(500).send("Erro interno do servidor ao tentar excluir aluno: ",err)
+    const result = await db.query(`DELETE FROM aluno WHERE id_aluno = $1`, [idStudent]);
+
+    if (result.rowCount === 0) {
+        return res.status(404).json({ message: "Turma não encontrada" });
+    }
+
+    return res.status(204).send();
+  } catch (error) {
+    throw new Error(error);
   }
 }
-
